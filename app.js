@@ -17,8 +17,8 @@ app.use(express.static("public"));
  
  
  
-mongoose.connect('mongodb+srv://admin-kevin:fofenob@cluster0.rdxrwo8.mongodb.net/todolistDB');
- 
+//mongoose.connect('mongodb+srv://admin-kevin:fofenob@cluster0.rdxrwo8.mongodb.net/todolistDB');
+ mongoose.connect("mongodb://127.0.0.1:27017/todolistDB")
 const itemsSchema = new mongoose.Schema({
   name: String,
 });
@@ -120,22 +120,33 @@ app.post("/", function(req, res){
   }
 });
  
-app.post("/delete", async function (req, res) {
-  let id = req.body.checkbox;
-  let listName = req.body.listName.toLowerCase();
-  if(listName === "today"){
-      try {
-          const item = await Item.findByIdAndDelete(id);
-      } catch (err) {
-          console.log(err);
-      }
-      return res.redirect("/");
+app.post("/delete", function(req, res) {
+  const checkedItemId = req.body.checkbox;
+  const listName = req.body.listName;
+
+  if (listName === "Today") {
+    Item.findByIdAndRemove(checkedItemId)
+      .then(() => {
+        console.log("Successfully deleted checked item.");
+        res.redirect("/");
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  } else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedItemId } } }
+    )
+      .then(() => {
+        res.redirect("/" + listName);
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }
-  let foundList = await List.findOne({name: listName}).exec();
-  foundList.items.pull({_id: id});
-  foundList.save();
-  return res.redirect("/"+listName);
 });
+
  
 
  
@@ -144,6 +155,6 @@ app.get("/about", function(req, res){
   res.render("about");
 });
  
-app.listen(3000, function() {
-  console.log("Server started on port 3000");
-});
+app.listen(process.env.PORT||3000,function () {
+  console.log("Server is running at port 3000");
+ });
