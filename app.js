@@ -17,8 +17,8 @@ app.use(express.static("public"));
  
  
  
-//mongoose.connect('mongodb+srv://admin-kevin:fofenob@cluster0.rdxrwo8.mongodb.net/todolistDB');
- mongoose.connect("mongodb://127.0.0.1:27017/todolistDB")
+mongoose.connect('mongodb+srv://admin-kevin:fofenob@cluster0.rdxrwo8.mongodb.net/todolistDB');
+ //mongoose.connect("mongodb://127.0.0.1:27017/todolistDB")
 const itemsSchema = new mongoose.Schema({
   name: String,
 });
